@@ -1,0 +1,433 @@
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <!--Import Google Icon Font-->
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <!-- Compiled and minified CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+        <title>Room Temperature Control</title>
+    </head>
+
+    <body>
+
+        <!-- navbar -->
+        <header>
+            <nav class="nav-wrapper blue">
+                <div class="container">
+                    <a href="#" class="brand-logo, flow-text">My Room Enviroment Control</a>
+                    <a href="#" class="sidenav-trigger" data-target="mobile-menu">
+                    <i class="material-icons">menu</i>
+                    </a>
+                    <ul class="right hide-on-med-and-down">
+                    <li><a href="/">View Temperature</a></li>
+                    <li><a href="#">Control Temperature</a></li>
+                    </ul>
+                    <ul class="sidenav grey lighten-2" id="mobile-menu">
+                    <li><a href="/">View Temperature</a></li>
+                    <li><a href="#">Control Temperature</a></li>        
+                    </ul>
+                </div>
+            </nav>
+        </header>
+
+
+        <!-- grid/cards -->
+
+        <div class="row">
+            <div class="card">
+                <div class="card-content">
+                <div class="col s12 m12">
+                    
+                        <div class= "align-items: center">
+                            <a class="waves-effect waves-light btn" id="state_button"><i class="material-icons">power_settings_new</i></a>   
+                        </div>
+                
+                </div>
+        </div>
+
+        <div class="row">
+                <div class="col s12 m12">
+                    
+                        <div class= "align-items: center"> 
+                            <h3 style = "
+                            line-height: 100%;
+                            margin: 0.5rem 0 0rem 0" id="state">OFF</h3>
+                        </div>
+                
+                </div>
+        </div>
+
+        <div class="row">
+            
+            <div class="col s6 m6">
+                    <div class="row">
+                        <div class="col s12 m12">
+                            
+                                <div class= "align-items: center">
+                                    <a class="waves-effect waves-light btn-large" id="temp_up"><i class="material-icons">arrow_upward</i></a> 
+                                </div>
+                        
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col s12 m12">
+                                <div class= "align-items: center">     
+                                        <h3 style = "
+                                        line-height: 110%;
+                                        margin: -1.1rem 0 -1.1rem 0" ><span id = 'temp'>24</span>°C</h3>                        
+                                </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col s12 m12">
+                            
+                                <div class= "align-items: center">
+                                    <a class="waves-effect waves-light btn-large" id="temp_down"><i class="material-icons">arrow_downward</i></a> 
+                                </div>
+                        
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col s6 m6">
+                        <div class="row">
+                            <div class="col s12 m12">
+                                
+                                    <div class= "align-items: center">
+                                        <a class="waves-effect waves-light btn-large" id="fan_up"><i class="material-icons">arrow_upward</i></a> 
+                                    </div>
+                            
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s12 m12">
+                                    <div class= "align-items: center">     
+                                            <h3 style = "
+                                            line-height: 110%;
+                                            margin: -1.1rem 0 -1.1rem 0"id="fan_speed">LOW</h3>                        
+                                    </div>
+                            </div>
+                        </div>
+    
+                        <div class="row">
+                            <div class="col s12 m12">
+                                
+                                    <div class= "align-items: center">
+                                        <a class="waves-effect waves-light btn-large" id="fan_down"><i class="material-icons">arrow_downward</i></a> 
+                                    </div>
+                            
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <div class="row">  
+
+                <div class="col s12 m12">
+                    <div class="card">
+                      <div class="card-content">
+                        <span class="card-title">Sleep</span>
+                        <div class="input-field">
+                        <label for="sleep" class=""><span id = 'ac_label'>Turnoff AC at</span></label>
+                        <input id = "sleep" type="text" class="timepicker">
+                        </div>
+                        <a id = "set_btn" class="waves-effect waves-light btn">Set</a>
+                        <a id = "cancel_btn" class="btn disabled">Cancel</a>
+                      </div>
+                    </div>                
+                </div>
+
+            </div>
+
+        <!-- Compiled and minified JavaScript -->
+ 
+        <script src="{{url_for('static', filename='paho-mqtt.js')}}"></script>  //The paho mqtt library script is kept in static folder of the Flask app
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    
+        <script> 
+
+            $(document).ready(function(){
+
+                $('.sidenav').sidenav();
+
+                var client;
+                var host = window.location.hostname;
+                var port = 443;
+                var reconnectTimeout = 2000;
+
+                
+                console.log("connecting to "+ host +" "+ port);
+
+                var random_number = Math.floor(Math.random() * 100);
+
+                var id = "Client_ID_" + random_number.toString()
+
+                client = new Paho.MQTT.Client(host,port,id);
+
+                console.log(id)
+                
+                client.onConnectionLost = onConnectionLost;
+                client.onMessageArrived = onMessageArrived;
+
+                var options = {
+                    useSSL : true,
+                    timeout: 30,
+                    onSuccess: onConnect,
+                    onFailure: onFailure, 
+                    reconnect : true,
+                    keepAliveInterval : 100000,
+                    
+                };
+            
+                client_connect();//connect to MQTT client
+
+                function onConnect() {
+                    // Once a connection has been made, make a subscription and send a message.
+                    console.log("Connected to server");
+                    client.subscribe("remote/update01");
+                    client.subscribe("remote/update04");
+                    
+                }
+		
+
+                function onFailure(message) {                  //Function triggred when connection to MQTT server is not established
+                    console.log("Connection Attempt to Host "+host+" Failed");
+                    console.log("Connection failed: " + message.errorMessage);
+                }
+		
+
+                function onConnectionLost(responseObject) {    //Function triggred when connection to MQTT server is lost
+                    if (responseObject.errorCode !== 0) {
+                    console.log("onConnectionLost:"+responseObject.errorMessage);
+                   
+                    }
+                   
+                }
+		
+
+                function client_connect() {
+
+                    client.connect(options);
+
+                }
+		
+
+                function onMessageArrived(msg){
+                    out_msg="Message received "+msg.payloadString+"<br>";
+                    out_msg=out_msg+"Message received Topic "+msg.destinationName;
+                    console.log(out_msg);
+   
+
+                    if (msg.destinationName === "remote/update01") {         
+
+                        remote_update = JSON.parse(msg.payloadString);
+                        update_remote_state(remote_update);
+
+                    } else if (msg.destinationName == "remote/update04") {
+
+                        update_remote_sleep_state(msg.payloadString);
+                    }
+
+                }
+
+
+                function update_remote_state(remote_update) {      //Update the displayed power state, temperature and fan speed when message arrives
+
+                    current_state = {
+                                "TEMP" : remote_update.TEMP,
+                                "STATE" : remote_update.STATE,   
+                                "FAN_SPEED" : remote_update.FAN_SPEED
+                                };
+
+                    if (remote_update.STATE === "ON" && $("#cancel_btn").attr("class") === "btn disabled"){
+                        $("#set_btn").attr("class", "waves-effect waves-light btn");
+                    } else if  (remote_update.STATE === "OFF"){
+                        $("#set_btn").attr("class", "btn disabled");
+                    }
+
+
+                    $("#state").text(remote_update.STATE);
+                    $("#temp").text(remote_update.TEMP);
+                    $("#fan_speed").text(remote_update.FAN_SPEED);
+
+                }
+
+                
+                
+                function update_remote_sleep_state(sleep_time) {     //Update the displayed state of the sleep mode
+
+                    if (sleep_time === 'cancel_and_off' || sleep_time === 'cancel') {
+
+                        $("#ac_label").text("Turnoff AC at");
+                        $("input[id='sleep']").val("");
+                        $("#cancel_btn").attr("class", "btn disabled");
+
+                        if ($("#state").text() === 'OFF'){
+
+                            $("#set_btn").attr("class", "btn disabled");
+
+                        } else {
+
+                            $("#set_btn").attr("class", "waves-effect waves-light btn");
+
+                        }
+
+
+                    } else {
+
+                        $("#ac_label").text("");
+                        $("input[id='sleep']").val(sleep_time)
+                        $("#cancel_btn").attr("class", "waves-effect waves-light btn");
+                        $("#set_btn").attr("class", "btn disabled");
+
+                    }
+
+                }
+
+                
+
+
+                var current_state;    
+                
+                
+
+                $("#state_button").click(function(){  //Function triggered when power button is pressed
+
+                    $.ajax({
+                        type: 'POST',
+                        url: "/power_control",
+                        data: current_state,
+                        dataType: 'json',
+                        global: false,
+                        async:true,
+                    });
+
+                });
+
+                $("#temp_up").click(function(){      //Function triggered when temperature increase button is pressed
+
+                    $.ajax({
+
+                        type: 'POST',
+                        url: "/temp_up_control",
+                        data: current_state,
+                        dataType: 'json',
+                        global: false,
+                        async:true,
+
+                    });
+
+                 });
+
+                $("#temp_down").click(function(){    //Function triggered when temperature decrease button is pressed
+
+                    $.ajax({
+
+                        type: 'POST',
+                        url: "/temp_down_control",
+                        data: current_state,
+                        dataType: 'json',
+                        global: false,
+                        async:true,
+
+                    });
+
+                });
+
+
+                $("#fan_up").click(function(){      //Function triggered when fan speed increase button is pressed
+
+                    $.ajax({
+
+                        type: 'POST',
+                        url: "/fan_up_control",
+                        data: current_state,
+                        dataType: 'json',
+                        global: false,
+                        async:true,
+                
+
+                    });
+
+                });
+
+                
+                $("#fan_down").click(function(){    //Function triggered when fan speed decrease button is pressed
+
+                    $.ajax({
+
+                        type: 'POST',
+                        url: "/fan_down_control",
+                        data: current_state,
+                        dataType: 'json',
+                        global: false,
+                        async:true,
+
+                    });
+
+                });
+
+
+                $('.timepicker').timepicker({
+                    twelveHour: false
+                    });
+
+                
+                $("#set_btn").click(function(){       //Function triggered when sleep button is pressed
+
+                    var time = $("input[id='sleep']").val();
+
+                    if (time === "") {
+
+                        M.toast({html: 'Please select sleep time'});
+                    }
+
+                    else {
+
+                        
+
+                        $.ajax({
+
+                            type: 'POST',
+                            url: "/set_sleep",
+                            data: {set_time : time},
+                            dataType: 'json',
+                            global: false,
+                            async: true,
+                          
+                        });
+                    }                    
+                });
+
+
+                $("#cancel_btn").click(function(){     //Function triggered when sleep cancel button is pressed
+
+                    $.ajax({
+
+                        type: 'GET',
+                        url: "/cancel_sleep",
+                        dataType: 'json',
+                        global: false,
+                        async: true,
+
+                    });
+
+                });
+
+
+            });
+    
+        </script>
+
+    </body>
+
+</html>

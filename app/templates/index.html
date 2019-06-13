@@ -1,0 +1,293 @@
+<html lang="en">
+
+    <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta http-equiv="X-UA-Compatible" content="ie=edge">
+            <!--Import Google Icon Font-->
+            <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+            <!-- Compiled and minified CSS -->
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+            <title>Room Temperature Control</title>
+    </head>
+
+    <body>
+
+        <!-- navbar -->
+        <header>
+            <nav class="nav-wrapper blue">
+            <div class="container">
+                <a href="#" class="brand-logo, flow-text">My Room Enviroment Control</a>
+                <a href="#" class="sidenav-trigger" data-target="mobile-menu">
+                <i class="material-icons">menu</i>
+                </a>
+                <ul class="right hide-on-med-and-down">
+                <li><a href="#">View Temperature</a></li>
+                <li><a href= "/remote_control">Control Temperature</a></li>
+                </ul>
+                <ul class="sidenav grey lighten-2" id="mobile-menu">
+                <li><a href="#">View Temperature</a></li>
+                <li><a href= "/remote_control">Control Temperature</a></li>        
+                </ul>
+            </div>
+            </nav>
+        </header>
+
+        <!-- grid/cards -->
+        <div class="row">
+            <div class="col s12 m3">
+                <div class="card">
+                    <div class="card-content">
+                    <span class="card-title">Temperature</span>
+                    <h1 style= "font-size: 4.2rem;
+                    line-height: 100%;
+                    margin: -0.2rem 0 -1.32rem 0;"id="temp_1">{{temp}}°C</h1>
+                    </div>
+                </div>
+
+                <div class="col s12 m8">
+                        <div class="card" style="padding: 0% 0% 0% 0%;">
+                          <div class="card-content" id="chart_temps"></div>
+                        </div>
+                </div>
+        
+        
+                <div class="col s12 m1" style= "padding: 0px 3.75rem;">
+                  <div class="row">
+        
+                    <div class="col s6 m12">
+                    <p>
+                      <label>
+                        <input class="with-gap" name="chart_range" type="radio" checked value="1"/>
+                        <span>1h</span>
+                      </label>
+                    </p>
+                    </div>
+        
+                    <div class="col s6 m12">
+                    <p>
+                      <label>
+                        <input class="with-gap" name="chart_range" type="radio" value="3"/>
+                        <span>3h</span>
+                      </label>
+                    </p>
+                    </div>
+        
+                    <div class="col s6 m12">
+                    <p>
+                      <label>
+                        <input class="with-gap" name="chart_range" type="radio" value="6"/>
+                        <span>6h</span>
+                      </label>
+                    </p>
+                    </div>
+                    
+                    <div class="col s6 m12">
+                    <p>
+                      <label>
+                        <input class="with-gap" name="chart_range" type="radio" value="12"/>
+                        <span>12h</span>
+                      </label>
+                    </p>
+                    </div>
+                    
+                    <div class="col s12 m12">
+                    <p>
+                      <label>
+                        <input class="with-gap" name="chart_range" type="radio" value="24"/>
+                        <span>24h</span>
+                      </label>
+                    </p> 
+                    </div> 
+                  </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="{{url_for('static', filename='paho-mqtt.js')}}"></script>  //The paho mqtt library script is kept in static folder of the Flask app
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+
+        <script>
+            $(document).ready(function(){
+
+                $('.sidenav').sidenav();
+
+                var client;
+                var host = window.location.hostname;
+                var port = 443;
+                var reconnectTimeout = 2000;
+
+                
+                console.log("connecting to "+ host +" "+ port);
+
+                var random_number = Math.floor(Math.random() * 100);
+
+                var id = "Client_ID_" + random_number.toString()
+
+                client = new Paho.MQTT.Client(host,port,id);
+
+                console.log(id)
+        
+                client.onMessageArrived = onMessageArrived
+
+                var options = {
+                    useSSL : true,
+                    timeout: 30,
+                    onSuccess: onConnect,
+                    onFailure: onFailure, 
+                    reconnect : true,
+                    keepAliveInterval : 100000,
+                };
+            
+                client.connect(options); //connect to MQTT server
+
+                function onConnect() {
+                    // Once a connection has been made, make a subscription and send a message.
+                    console.log("Connected to server");
+                    client.subscribe("temperature/sensor01");
+                    
+                }
+
+                function onFailure(message) {                  //Function triggred when connection to MQTT server is not established
+                    console.log("Connection Attempt to Host "+host+" Failed");
+                    console.log("Connection failed: " + message.errorMessage);
+                    // setTimeout(MQTTconnect, reconnectTimeout);
+                }
+
+                function onConnectionLost(responseObject) {     //Function triggred when connection to MQTT server is lost
+                    if (responseObject.errorCode !== 0) {
+                    console.log("onConnectionLost:"+responseObject.errorMessage);
+                   
+                    }
+                   
+                }
+
+                function onMessageArrived(msg){
+                    out_msg="Message received "+msg.payloadString+"<br>";
+                    out_msg=out_msg+"Message received Topic "+msg.destinationName;
+                    console.log(out_msg);
+
+                    $("#temp_1").text(msg.payloadString)  //Update the displayed temperature when message arrives.
+                    update_temperature(msg.payloadString) //Update the temperature graph when message arrives.
+                }
+
+                var temp_data;
+
+                function create_chart(hours_required) {
+                  var myJsonObj = getJson(hours_required);
+                  temp_data = jsontoArray(myJsonObj);
+                  google.charts.load('current', {'packages':['corechart']});
+                  google.setOnLoadCallback(drawChart);
+                }
+
+                create_chart('1')
+              
+
+                $("input[type='radio']").click(function(){      //Function is triggered when the radion button is selected to retreive temperature history
+                  var hrs = $("input[name='chart_range']:checked").val();
+                  create_chart(hrs)
+                });
+
+                $(window).resize(function(){
+                  drawChart();
+                });
+	
+
+                function getJson(hrs) {              // Function to retreive temperautre history
+                  return JSON.parse($.ajax({
+                    type: 'POST',
+                    url: "/update_chart",
+                    data: {hours: hrs},
+                    dataType: 'json',
+                    global: false,
+                    async: false,
+                    success: function(data) {
+                        return data;
+                    }
+                  }).responseText);
+                }
+
+                function jsontoArray(myJsonObj){
+                  xtemp = []
+                  for (var key in myJsonObj){
+                    var time = [];
+                    var xdata = [];
+                    time.push(myJsonObj[key]['hrs']);
+                    time.push(myJsonObj[key]['mins']);
+                    time.push(myJsonObj[key]['sec']);
+                    xdata.push(time);
+                    xdata.push(myJsonObj[key]['temp']);
+                    xtemp.push(xdata)
+                    };
+                    
+                    return xtemp;
+
+                }
+
+                function drawChart() {
+    
+                var data = new google.visualization.DataTable();
+                data.addColumn('timeofday', 'Time of Day');
+                data.addColumn('number', 'Temperature');
+                data.addRows(temp_data);
+
+                var options = {
+                  width: '100%',
+                  height: 200,
+                  hAxis: {
+                    title: 'Time'
+                  },
+                  vAxis: {
+                    title: 'Degrees'
+                  },
+                  curveType: 'function'  //Makes line curved
+                };
+
+                var chart = new google.visualization.LineChart(document.getElementById('chart_temps'));
+
+                chart.draw(data, options);
+
+                }
+
+
+                function update_temperature(temp_string) {       
+
+                  temp_string.substring(0, temp_string.length-2)
+
+                  var new_temp = parseFloat(temp_string)
+
+                  var now = new Date()
+
+                  var new_row = []
+
+                  var new_time = []
+
+                  new_time.push(now.getHours())
+                  new_time.push(now.getMinutes())
+                  new_time.push(now.getSeconds())
+
+                  new_row.push(new_time)
+
+                  new_row.push(new_temp)
+
+                  temp_data.shift()
+                  temp_data.push(new_row)
+
+                  google.charts.load('current', {'packages':['corechart']});
+                  google.setOnLoadCallback(drawChart);
+
+                }
+
+                    
+            });
+
+
+            
+        </script>
+
+    </body>
+
+</html>
