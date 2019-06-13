@@ -4,7 +4,7 @@ import sqlite3
 def get_last_records():
 
 
-    conn=sqlite3.connect('/var/www/my_room_env/ac_state_record.db')
+    conn=sqlite3.connect('/var/www/my_room_env_v2/app/data_base/ac_state_record.db')
     curs=conn.cursor()
     curs.execute("select * from STATUS order by rDAtetime desc limit 1;")
     last_record = curs.fetchall()

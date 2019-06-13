@@ -7,7 +7,7 @@ import paho.mqtt.publish as publish
 import Adafruit_DHT
 import sqlite3
 
-data_base_path = '/var/www/lab_app/lab_app.db'
+data_base_path = '/var/www/my_room_env_v2/app/data_base/temperature_and_humidity_record.db'
 
 def log_values(sensor_id, temp, hum):
 	conn=sqlite3.connect(data_base_path)

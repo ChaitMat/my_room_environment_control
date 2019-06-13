@@ -4,7 +4,7 @@ import sqlite3
 import json
 
 def getrecords(hours):
-    conn=sqlite3.connect('/var/www/lab_app/lab_app.db')
+    conn=sqlite3.connect('/var/www/my_room_env_v2/app/data_base/temperature_and_humidity_record.db')
     curs=conn.cursor()
     curs.execute("select * from temperatures where rDatetime >= datetime('now','localtime', ?)", (hours,))
     temp = curs.fetchall()
