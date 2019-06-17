@@ -10,8 +10,7 @@ Thw web app is built using a Flask framework and MQTT protocol is used to publis
 * Control the AC by switching it ON/OFF, controlling the air temperature and fan speed.
 * Sleep mode
 
-![Web app features](images/web_app_01.png)![Web app features](images/web_app_02.png)
-
+<img src = "images/web_app_01.png" height = "400" border = "5"><img src = "images/web_app_02.png" height = "400" border = "5">
 
 ## Hardware requirements
 
