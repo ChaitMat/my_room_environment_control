@@ -28,10 +28,7 @@ The decoded IR codes are stored in a file called lirc. Following are the sample 
  # brand:                       LG
  # model no. of remote control: 6711A20109B
  # devices being controlled by this remote:AIR CONDITIONER
-
-
 begin remote
-
   name  LG
   bits           28
   flags CONST_LENGTH
@@ -43,17 +40,11 @@ begin remote
   zero          651   459
   ptrail        651
   gap          103993
-
-
-
       begin codes
-
         AC16_LOW_TURNON		0x8800101
         AC16_MED_TURNON		0x8800123
-        AC16_HI_TURNON		0x8800145
-        
+        AC16_HI_TURNON		0x8800145      
       end codes
-
 end remote
 ```
 
