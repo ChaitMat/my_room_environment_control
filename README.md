@@ -49,5 +49,11 @@ begin remote
       end codes
 end remote
 ```
+The IR signals can be sent using python as follows:-
+```python
+import os
+os.system("irsend SEND_ONCE LG AC16_LOW_TURNON")
+```
+
 
 
