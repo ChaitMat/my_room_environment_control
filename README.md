@@ -55,5 +55,8 @@ import os
 os.system("irsend SEND_ONCE LG AC16_LOW_TURNON")
 ```
 
+## Code overview of the app
+Following is an overview of the code and libraries used for various features of the app
+
 
 
