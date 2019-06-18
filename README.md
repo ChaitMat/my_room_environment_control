@@ -12,7 +12,7 @@ Thw web app is built using a Flask framework and MQTT protocol is used to publis
 
 <img src = "images/web_app_01.png" height = "400" border = "2"><img src = "images/web_app_02.png" height = "400" border = "2">
 
-## Code overview of the app
+## Code overview of the web app
 Following is an overview of the code and libraries used for various features of the app. Please refer the repository for complete code.
 
 ### Controlling the AC
@@ -92,4 +92,5 @@ The web app can be started on the Raspberry Pi using the following steps:
    ```
 6. Enter the IP adrress of the Raspberry pi with port number 8080 in the browser of the device connected to the same network to which the Raspberry pi is connected. Eg "192.169.1.101:8080"
 
+**Note:** To access the web app over the internet a server like NGINX and UWSGI will have to be installed on the Raspberry pi. Please find the configuration files for UWSGI and NGINX in the repository for furthur reference.
 
