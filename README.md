@@ -69,3 +69,8 @@ Temperature data acquired from DHT22 sensor is published over MQTT   to the topi
 
 <img src = "images/code_overview_02.png" height = "400" border = "2" alignment = "centre">
 
+### The Sleep Mode
+The web app can shutdown the AC automatically at a particular time in the future. When the client sends a request to the app to shut the AC off at a particular time the app executes an asynchronous celery task which calculates the time difference in seconds between the time the sleep mode is set and the time you want the AC to turn off. The code execution will be delayed using the time.sleep() method after which the IR signal to turn off the AC is sent.
+
+<img src = "images/code_overview_03.png" height = "400" border = "2" alignment = "centre">
+
