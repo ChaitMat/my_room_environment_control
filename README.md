@@ -1,6 +1,6 @@
 # Web app to control the AC over the internet.
 This project is a web app to control an AC (Air Conditioner) in my room. Raspberry pi is used to host the web app and control the AC using an IR blaster.
-Thw web app is built using a Flask framework and MQTT protocol is used to publish data to multiple users. Celery is used to scedule tasks and run asynchronous tasks.
+The web app is built using a Flask framework and MQTT protocol is used to publish data to multiple users. Celery is used to schedule tasks and run asynchronous tasks.
 
 ## Features of the web app
 
@@ -13,16 +13,16 @@ Thw web app is built using a Flask framework and MQTT protocol is used to publis
 <img src = "images/web_app_01.png" height = "400" border = "2"><img src = "images/web_app_02.png" height = "400" border = "2">
 
 ## Code overview of the web app
-Following is an overview of the code and libraries used for various features of the app. Please refer the repository for complete code.
+Following is an overview of the code and libraries used for various features of the app. Please refer the repository for the complete code.
 
 ### Controlling the AC
 
-When a button on the web app interface is pressed, (for eg. OFF) a HTTP POST request with the current state is sent to the Flask app. The app processes the data, sends the required IR signal to the AC and publishes the changed state to the MQTT broker for the topic "remote/update". The MQTT broker publishes data to all the clients subscribed to the topic "remote/update". There fore all the clients using the web app will have the updated current state.
+When a button on the web app interface is pressed, (for eg. OFF) a HTTP POST request with the current state is sent to the Flask app. The app processes the data, sends the required IR signal to the AC and publishes the changed state to the MQTT broker to the topic "remote/update". The MQTT broker publishes data to all the clients subscribed to the topic "remote/update". Therefore all the clients using the web app will have the updated current state.
 
 <img src = "images/code_overview_01.png" height = "400" border = "2" alignment = "centre">
 
 ### Periodically publishing sensor data to multiple devices
-Temperature data acquired from DHT22 sensor is published over MQTT   to the topic “temperature/sensor01” after every 10 mins to all the clients subscribed to this topic. The periodic publishing of the data is done using the Celery Beat Scheduler.
+Temperature data acquired from DHT22 sensor is published over MQTT to the topic “temperature/sensor01” after every 10 mins to all the clients subscribed to this topic. The periodic publishing of the data is done using the Celery Beat Scheduler.
 
 <img src = "images/code_overview_02.png" height = "400" border = "2" alignment = "centre">
 
@@ -41,7 +41,7 @@ The web app can shutdown the AC automatically at a particular time in the future
 
 The IR codes to control the AC are decoded using the [LIRC](http://www.lirc.org/). Refer this [blog](http://alexba.in/blog/2013/01/06/setting-up-lirc-on-the-raspberrypi/) to decode a the IR signal for a particular remote and setup the Raspberry PI for IR signal transmission through the IR blaster circuit.
 
-The decoded IR codes are stored in a file called lirc. Following are the sample codes:-
+The decoded IR codes are stored in a file called lircd.conf. Following is a sample lircd.conf file:-
 
 ```
  # contributed by : Chaitanya M
