@@ -74,3 +74,23 @@ The web app can shutdown the AC automatically at a particular time in the future
 
 <img src = "images/code_overview_03.png" height = "400" border = "2" alignment = "centre">
 
+## Running the app
+
+The web app can be started on the Raspberry Pi using the following steps:
+1. [Install and configure Mosquitto Broker for websockets](https://gist.github.com/smoofit/dafa493aec8d41ea057370dbfde3f3fc)
+2. Install and run redis message broker.
+3. Execute the following command in linux CLI to start celery worker:
+   ```
+   $ celery -A main.celery worker --loglevel=INFO
+   ```
+4. Execute the following command in linux CLI to start celery beat scheduler:
+   ```
+   $ celery -A main.celery beat --loglevel=INFO
+   ```
+5. Execute the following command in linux CLI to start flask app:
+   ```
+   $ python main.py
+   ```
+6. Enter the IP adrress of the Raspberry pi with port number 8080 in the browser of the device connected to the same network to which the Raspberry pi is connected. Eg "192.169.1.101:8080"
+
+
