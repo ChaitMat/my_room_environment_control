@@ -60,9 +60,12 @@ Following is an overview of the code and libraries used for various features of 
 
 ### Controlling the AC
 
-When a button on the web app interface is pressed, (for eg. OFF) a HTTP POST request with the current state is sent to the Flask app. The app processes the data, sends the required IR signal to the AC and publishes the changed state to the MQTT broker for the topic "remote/update". The MQTT broker publishes data to all the clients subscribed to the topic "remote/update".
+When a button on the web app interface is pressed, (for eg. OFF) a HTTP POST request with the current state is sent to the Flask app. The app processes the data, sends the required IR signal to the AC and publishes the changed state to the MQTT broker for the topic "remote/update". The MQTT broker publishes data to all the clients subscribed to the topic "remote/update". There fore all the clients using the web app will have the updated current state.
 
 <img src = "images/code_overview_01.png" height = "400" border = "2" alignment = "centre">
 
+### Periodically publishing sensor data to multiple devices
+Temperature data acquired from DHT22 sensor is published over MQTT   to the topic “temperature/sensor01” after every 10 mins to all the clients subscribed to this topic. The periodic publishing of the data is done using the Celery Beat Scheduler.
 
+<img src = "images/code_overview_02.png" height = "400" border = "2" alignment = "centre">
 
