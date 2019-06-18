@@ -94,3 +94,9 @@ The web app can be started on the Raspberry Pi using the following steps:
 
 **Note:** To access the web app over the internet a server like NGINX and UWSGI will have to be installed on the Raspberry pi. Please find the configuration files for UWSGI and NGINX in the repository for furthur reference.
 
+## Python Pune June 2019 meetup
+
+I prensented my project at a meetup called PYTHON PUNE on June 2019. You can find the PPT at the following link:
+
+https://docs.google.com/presentation/d/1q0qw2O6a-XGQaC2bJTWJJGZb-Y2YTlUi307I75EcJnY/edit?usp=sharing
+
