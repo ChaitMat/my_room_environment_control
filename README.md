@@ -62,7 +62,7 @@ Following is an overview of the code and libraries used for various features of 
 
 When a button on the web app interface is pressed, (for eg. OFF) a HTTP POST request with the current state is sent to the Flask app. The app processes the data, sends the required IR signal to the AC and publishes the changed state to the MQTT broker for the topic "remote/update". The MQTT broker publishes data to all the clients subscribed to the topic "remote/update".
 
-
+<img src = "images/Code_Overview_01.png" height = "400" border = "2" alignment = "centre">
 
 
 
