@@ -2,7 +2,7 @@
 This project is a web app to control an AC (Air Conditioner) in my room. Raspberry pi is used to host the web app and control the AC using an IR blaster.
 Thw web app is built using a Flask framework and MQTT protocol is used to publish data to multiple users. Celery is used to scedule tasks and run asynchronous tasks.
 
-## Features of the app
+## Features of the web app
 
 * View current temperature of the room
 * View temperature history of the room.
@@ -11,6 +11,25 @@ Thw web app is built using a Flask framework and MQTT protocol is used to publis
 * Sleep mode
 
 <img src = "images/web_app_01.png" height = "400" border = "2"><img src = "images/web_app_02.png" height = "400" border = "2">
+
+## Code overview of the app
+Following is an overview of the code and libraries used for various features of the app. Please refer the repository for complete code.
+
+### Controlling the AC
+
+When a button on the web app interface is pressed, (for eg. OFF) a HTTP POST request with the current state is sent to the Flask app. The app processes the data, sends the required IR signal to the AC and publishes the changed state to the MQTT broker for the topic "remote/update". The MQTT broker publishes data to all the clients subscribed to the topic "remote/update". There fore all the clients using the web app will have the updated current state.
+
+<img src = "images/code_overview_01.png" height = "400" border = "2" alignment = "centre">
+
+### Periodically publishing sensor data to multiple devices
+Temperature data acquired from DHT22 sensor is published over MQTT   to the topic “temperature/sensor01” after every 10 mins to all the clients subscribed to this topic. The periodic publishing of the data is done using the Celery Beat Scheduler.
+
+<img src = "images/code_overview_02.png" height = "400" border = "2" alignment = "centre">
+
+### The Sleep Mode
+The web app can shutdown the AC automatically at a particular time in the future. When the client sends a request to the app to shut the AC off at a particular time the app executes an asynchronous celery task which calculates the time difference in seconds between the time the sleep mode is set and the time you want the AC to turn off. The code execution will be delayed using the time.sleep() method after which the IR signal to turn off the AC is sent.
+
+<img src = "images/code_overview_03.png" height = "400" border = "2" alignment = "centre">
 
 ## Hardware requirements
 
@@ -54,26 +73,6 @@ The IR signals can be sent using python as follows:-
 import os
 os.system("irsend SEND_ONCE LG AC16_LOW_TURNON")
 ```
-
-## Code overview of the app
-Following is an overview of the code and libraries used for various features of the app.
-
-### Controlling the AC
-
-When a button on the web app interface is pressed, (for eg. OFF) a HTTP POST request with the current state is sent to the Flask app. The app processes the data, sends the required IR signal to the AC and publishes the changed state to the MQTT broker for the topic "remote/update". The MQTT broker publishes data to all the clients subscribed to the topic "remote/update". There fore all the clients using the web app will have the updated current state.
-
-<img src = "images/code_overview_01.png" height = "400" border = "2" alignment = "centre">
-
-### Periodically publishing sensor data to multiple devices
-Temperature data acquired from DHT22 sensor is published over MQTT   to the topic “temperature/sensor01” after every 10 mins to all the clients subscribed to this topic. The periodic publishing of the data is done using the Celery Beat Scheduler.
-
-<img src = "images/code_overview_02.png" height = "400" border = "2" alignment = "centre">
-
-### The Sleep Mode
-The web app can shutdown the AC automatically at a particular time in the future. When the client sends a request to the app to shut the AC off at a particular time the app executes an asynchronous celery task which calculates the time difference in seconds between the time the sleep mode is set and the time you want the AC to turn off. The code execution will be delayed using the time.sleep() method after which the IR signal to turn off the AC is sent.
-
-<img src = "images/code_overview_03.png" height = "400" border = "2" alignment = "centre">
-
 ## Running the app
 
 The web app can be started on the Raspberry Pi using the following steps:
